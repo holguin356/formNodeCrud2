@@ -1,32 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insertar Nota</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insertar Nota</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
+
 <body class="bg-dark">
-    <div class="container p-3">
-        <div class="row p-3">
-            <div class="col m-3 p-4 rounded-3  bg-light">
-                <form action="/insertar" method="POST">
-                    <div class="mb-3">
-                      <h1>Agregar nueva nota</h1>
-                      <label for="nombre" class="form-label">Nombre de la nota:</label>
-                      <input type="text" class="form-control" id="nombre" name="nombre" aria-describedby="Ingresa nombre de la nota" placeholder="Mercado" required>
-                      <div id="" class="form-text">Ingresa la nota que deseas</div>
-                    </div>
-                    <div class="mb-3">
-                      <label for="descripcion" class="form-label">Descripcion</label>
-                      <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="Comprar arroz, pollo, champiñon" required>
-                      <div id="" class="form-text">Ingresa la descripción nota que deseas</div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                  </form>
-            </div>
+  <!-- modal -->
+  <div class="modal fade" id="exampleModal" aria-hidden="true" aria-labelledby="exampleModalLabel" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Editar Nota</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+          <form action="/editar" method="post">
+            <label for="">Nota a editar: </label>
+            <input type="text" id="editarId" name="id"><br>
+            <label for="editarNombre">Nombre: </label>
+            <input type="text" id="editarNombre" name="nombre" required><br>
+            <label for="editarDescripcion">Descripción: </label>
+            <input type="text" id="editarDescripcion" name="descripcion" required><br>
+            <button type="submit">Guardar cambios</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
+  </div>
+  <!-- /modal -->
+  <div class="container p-3">
+    <div class="row p-3">
+      <div class="col m-3 p-4 rounded-3  bg-light">
+        <form action="/insertar" method="POST">
+          <div class="mb-3">
+            <h1>Agregar nueva nota</h1>
+            <label for="nombre" class="form-label">Nombre de la nota:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre"
+              aria-describedby="Ingresa nombre de la nota" placeholder="Mercado" required>
+            <div id="" class="form-text">Ingresa la nota que deseas</div>
+          </div>
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripcion</label>
+            <input type="text" class="form-control" id="descripcion" name="descripcion"
+              placeholder="Comprar arroz, pollo, champiñon" required>
+            <div id="" class="form-text">Ingresa la descripción nota que deseas</div>
+          </div>
+          <button type="submit" class="btn btn-success">Agregar</button>
+        </form>
+      </div>
+    </div>
+    <div class="col m-3 p-4 rounded-3  bg-light">
+      <h2>Listado de notas</h2>
+      <div id="notas" class="card">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // cargar las notas desde el servidor
+    async function cargarNotas() {
+      try {
+        //Realiza la solicitud GET a la ruta '/notas' para obtener los datos de las notas
+        const response = await fetch('/notas');
+        //vamos a convertir la respuesta a json
+        const notas = await response.json();
+        //seleccionamos el div donde pondremos las notas
+        const notasDiv = document.getElementById('notas');
+        //limpia el contenido anterior del div
+        notasDiv.innerHTML = "";
+        //itera sobre cada objeto 'nota' en el arreglo de notas y lo agrega al div
+        notas.forEach((nota) => {
+          notasDiv.innerHTML += `
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${nota.id}. ${nota.nombre}</h5>
+              <p class="card-text">${nota.descripcion}</p>
+              <p class="card-text"><small class="text-muted">${nota.fecha_creacion}</small></p>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onClick="cargarDatosEnFormulario(${nota.id}, ${nota.nombre},${nota.descripcion})">Editar</button>
+              <hr>
+            </div>
+          </div>
+        `
+        });
+      } catch (error) {
+        console.error('Error al cargar las notas', error);
+        console.log(error);
+      }
+    }
+    //Ejecuta la funcion cuando la pagina termina de cargar
+    window.onload = cargarNotas;
+  </script>
+  <script src="cargarNotas.js"></script>
+  <script src="editarNotas.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
